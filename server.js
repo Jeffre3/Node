@@ -1,26 +1,52 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const mime = require('mime-types');
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const cors = require("cors");
 
-const server = http.createServer((req, res) => {
-    let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-    fs.readFile(filePath, (err, content) => {
-        if (err) {
-            if (err.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('<h1>404 - File Not Found</h1>', 'utf8');
-            } else {
-                res.writeHead(500);
-                res.end(`Server Error: ${err.code}`);
-            }
-        } else {
-            res.writeHead(200, { 'Content-Type': mime.lookup(filePath) });
-            res.end(content, 'utf8');
-        }
-    });
+// Enable CORS
+app.use(cors());
+app.use(express.static("public"));
+
+// Configure Multer for file uploads
+const storage = multer.diskStorage({
+    destination: "uploads/",
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    },
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// File filter for allowed types
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|txt/;
+    const extName = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimeType = allowedTypes.test(file.mimetype);
+
+    if (extName && mimeType) {
+        return cb(null, true);
+    } else {
+        return cb(new Error("Invalid file type. Only images and text files are allowed."));
+    }
+};
+
+const upload = multer({ storage, fileFilter });
+
+// Serve the HTML form
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Handle file upload
+app.post("/upload", upload.single("file"), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+    }
+    res.json({ message: "File uploaded successfully", file: req.file.filename });
+});
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
