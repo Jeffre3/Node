@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+body {
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    background-color: #1a1a1a;
+    color: #0ff;
+    margin: 0;
+    padding: 20px;
+}
+
+nav {
+    background: linear-gradient(90deg, #003366, #007bff);
+    color: white;
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 2px 2px 5px #00ffff;
+    border-bottom: 4px solid #0ff;
+}
+
+.upload-section {
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 255, 255, 0.5);
+    display: inline-block;
+    margin-top: 20px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.upload-section:hover {
+    transform: scale(1.05);
+}
+
+input[type="file"] {
+    margin: 10px 0;
+    color: #0ff;
+    border: 1px solid #0ff;
+    padding: 8px;
+    background: #333;
+    border-radius: 5px;
+}
+
+button {
+    background: linear-gradient(45deg, #00ffff, #007bff);
+    color: black;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+    background: linear-gradient(45deg, #007bff, #00ffff);
+    transform: scale(1.1);
+    box-shadow: 0px 0px 10px #0ff;
+}
+
+footer {
+    margin-top: 30px;
+    background: #003366;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    text-shadow: 1px 1px 3px #00ffff;
+    border-top: 4px solid #0ff;
+}

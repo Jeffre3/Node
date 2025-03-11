@@ -1,52 +1,50 @@
-const express = require("express");
-const multer = require("multer");
-const path = require("path");
-const cors = require("cors");
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Enable CORS
-app.use(cors());
-app.use(express.static("public"));
-
-// Configure Multer for file uploads
+// Set storage for uploaded files
 const storage = multer.diskStorage({
-    destination: "uploads/",
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Files go to 'uploads' folder
     },
-});
-
-// File filter for allowed types
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|txt/;
-    const extName = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimeType = allowedTypes.test(file.mimetype);
-
-    if (extName && mimeType) {
-        return cb(null, true);
-    } else {
-        return cb(new Error("Invalid file type. Only images and text files are allowed."));
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Rename file
     }
-};
-
-const upload = multer({ storage, fileFilter });
-
-// Serve the HTML form
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Handle file upload
-app.post("/upload", upload.single("file"), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif|pdf|txt|docx/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        if (extname && mimetype) return cb(null, true);
+        cb(new Error('Only images, PDFs, and text files are allowed!'));
     }
-    res.json({ message: "File uploaded successfully", file: req.file.filename });
+}).single('file');
+
+// Middleware to serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Upload endpoint
+app.post('/upload', (req, res) => {
+    upload(req, res, (err) => {
+        if (err) {
+            return res.status(400).send(`<h2 style="color:red;">${err.message}</h2>`);
+        }
+        res.send(`<h2 style="color:green;">File uploaded successfully!</h2>`);
+    });
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Serve index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
